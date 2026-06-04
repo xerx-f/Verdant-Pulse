@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdant Pulse</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g0:#020c04;--g1:#071a09;--g2:#0d2e10;--g3:#165c1a;
+  --g4:#22a02a;--g5:#2ecc38;--g6:#5eff68;--g7:#a8ffad;
+  --neon:#00ff44;--dark:#030f05;
+  --heaven0:#f0f8ff;--heaven1:#e8f4fd;--heaven2:#d4ecf7;--heaven3:#a8d8f0;
+  --hgold:#ffd700;--hgold2:#fff4a0;--hwhite:#ffffff;
+  --mono:'Space Mono',monospace;--serif:'DM Serif Display',serif;
+}
+html,body{width:100%;height:100%;background:var(--g0);color:var(--g6);font-family:var(--mono);overflow:hidden;user-select:none;transition:background 3s ease,color 3s ease;}
+body.heaven{background:#c8eeff;color:#1a4a6b;}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--g0);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity 1.2s ease;}
+#loading.fade-out{opacity:0;pointer-events:none}
+.load-title{font-family:var(--serif);font-size:clamp(1.4rem,3vw,2.2rem);color:var(--g4);letter-spacing:.18em;margin-bottom:3.5rem;opacity:.7;}
+.load-ring-wrap{position:relative;width:130px;height:130px;display:flex;align-items:center;justify-content:center;}
+.load-ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--g3);animation:loadPulse 3.2s ease-in-out infinite;}
+.load-ring:nth-child(2){animation-delay:.6s;border-color:var(--g2);transform:scale(.82)}
+.load-ring:nth-child(3){animation-delay:1.2s;border-color:var(--g2);transform:scale(.65)}
+.load-core{width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 38% 36%,var(--g4) 0%,var(--g2) 70%,transparent 100%);animation:coreBreath 3.2s ease-in-out infinite;box-shadow:0 0 28px var(--g3),0 0 8px var(--g4);}
+@keyframes loadPulse{0%,100%{opacity:.18;transform:scale(1)}50%{opacity:.55;transform:scale(1.06)}}
+@keyframes coreBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+.load-bar-wrap{margin-top:3.2rem;width:180px;height:2px;background:var(--g1);border-radius:2px;overflow:hidden;}
+.load-bar{height:100%;width:0%;background:var(--g4);box-shadow:0 0 8px var(--g4);}
+.load-pct{margin-top:.9rem;font-size:.65rem;letter-spacing:.2em;color:var(--g3);}
+
+/* BG CANVAS */
+#bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:0;transition:opacity 2s;}
+
+/* HEAVEN OVERLAY */
+#heaven-overlay{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0;transition:opacity 4s ease;background:linear-gradient(180deg,#e8f6ff 0%,#c4e8ff 40%,#f0faff 100%);}
+#heaven-canvas{position:fixed;inset:0;pointer-events:none;z-index:1;}
+
+/* GAME LAYOUT */
+#game{position:fixed;inset:0;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr;grid-template-areas:"header header""stage shop";opacity:0;transition:opacity 1s ease .3s;z-index:2;}
+#game.visible{opacity:1}
+
+/* HEADER */
+#header{grid-area:header;padding:.55rem 1.2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--g2);background:rgba(2,12,4,.9);backdrop-filter:blur(6px);gap:.8rem;transition:background 3s,border-color 3s;}
+body.heaven #header{background:rgba(240,248,255,.92);border-bottom-color:#a8d8f0;}
+.hdr-title{font-family:var(--serif);font-size:.95rem;letter-spacing:.12em;color:var(--g4);opacity:.8;white-space:nowrap;transition:color 3s;}
+body.heaven .hdr-title{color:#1a6b8a;}
+.hdr-center{display:flex;align-items:center;gap:1rem;flex:1;justify-content:center;flex-wrap:wrap;}
+.hdr-stat{text-align:center;}
+.hdr-stat-val{font-size:1rem;font-weight:700;color:var(--g6);letter-spacing:.04em;line-height:1;transition:color 3s;}
+body.heaven .hdr-stat-val{color:#1a4a6b;}
+.hdr-stat-lbl{font-size:.44rem;letter-spacing:.2em;color:var(--g3);text-transform:uppercase;margin-top:.1rem;transition:color 3s;}
+body.heaven .hdr-stat-lbl{color:#5a8fa8;}
+.hdr-div{width:1px;height:24px;background:var(--g2);transition:background 3s;}
+body.heaven .hdr-div{background:#a8d8f0;}
+.hdr-stage{font-size:.48rem;letter-spacing:.2em;color:var(--g3);text-align:center;padding:.13rem .5rem;border:1px solid var(--g2);border-radius:2px;line-height:1.6;white-space:nowrap;transition:all 3s;}
+.hdr-stage span{display:block;color:var(--g4);font-size:.64rem;letter-spacing:.1em;transition:color 3s;}
+body.heaven .hdr-stage{border-color:#a8d8f0;color:#5a8fa8;}
+body.heaven .hdr-stage span{color:#1a6b8a;}
+
+/* STAGE AREA */
+#stage{grid-area:stage;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+
+/* STATS STRIP */
+#stats-strip{display:flex;gap:1.2rem;margin-top:1rem;z-index:3;}
+.ss-item{text-align:center;}
+.ss-val{font-size:.68rem;font-weight:700;color:var(--g5);letter-spacing:.04em;transition:color 3s;}
+body.heaven .ss-val{color:#1a6b8a;}
+.ss-lbl{font-size:.43rem;letter-spacing:.16em;color:var(--g2);text-transform:uppercase;margin-top:.1rem;transition:color 3s;}
+body.heaven .ss-lbl{color:#5a8fa8;}
+
+/* ORB */
+#orb-wrap{position:relative;cursor:pointer;z-index:3;touch-action:none;-webkit-tap-highlight-color:transparent;}
+.orb-aura{position:absolute;border-radius:50%;border:1px solid var(--g3);opacity:0;pointer-events:none;animation:auraIdle 5s ease-in-out infinite;transition:border-color 3s;}
+.orb-aura:nth-child(1){width:calc(100% + 50px);height:calc(100% + 50px);top:-25px;left:-25px;animation-delay:0s}
+.orb-aura:nth-child(2){width:calc(100% + 95px);height:calc(100% + 95px);top:-47px;left:-47px;animation-delay:1.6s}
+.orb-aura:nth-child(3){width:calc(100% + 150px);height:calc(100% + 150px);top:-75px;left:-75px;animation-delay:3.1s}
+@keyframes auraIdle{0%,100%{opacity:0;transform:scale(.96)}40%{opacity:.22;transform:scale(1)}}
+body.heaven .orb-aura{border-color:rgba(255,215,0,.4);}
+
+#orb{border-radius:50%;background:radial-gradient(circle at 38% 34%,var(--g6) 0%,var(--g4) 28%,var(--g2) 72%,transparent 100%);box-shadow:0 0 40px var(--g3),0 0 16px var(--g4),inset 0 0 22px rgba(0,255,68,.08);position:relative;z-index:1;transition:background 3s,box-shadow 3s;}
+body.heaven #orb{background:radial-gradient(circle at 38% 34%,#fff8d0 0%,#ffd700 28%,#a8d8f0 72%,transparent 100%);box-shadow:0 0 60px rgba(255,215,0,.5),0 0 30px rgba(255,255,255,.6),inset 0 0 30px rgba(255,215,0,.2);}
+#orb.clicked{animation:orbClick .22s ease-out forwards;}
+@keyframes orbClick{0%{transform:scale(1)}30%{transform:scale(1.08)}70%{transform:scale(.97)}100%{transform:scale(1)}}
+#orb.overcharge-active{box-shadow:0 0 80px var(--g4),0 0 40px var(--neon),inset 0 0 30px rgba(0,255,68,.2);}
+#orb.frenzy-active{animation:frenzyPulse .35s ease-in-out infinite;}
+@keyframes frenzyPulse{0%,100%{filter:brightness(1.4)}50%{filter:brightness(1.8) saturate(1.4)}}
+#orb.heaven-pulse{animation:heavenPulse 2s ease-in-out infinite;}
+@keyframes heavenPulse{0%,100%{filter:brightness(1) drop-shadow(0 0 20px gold)}50%{filter:brightness(1.3) drop-shadow(0 0 50px white)}}
+
+#fill-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--g4) calc(var(--fill)*1%),transparent calc(var(--fill)*1%));opacity:.35;pointer-events:none;--fill:0;transition:background 3s;}
+body.heaven #fill-ring{background:conic-gradient(gold calc(var(--fill)*1%),transparent calc(var(--fill)*1%));opacity:.5;}
+#combo-display{position:absolute;top:-2.4rem;left:50%;transform:translateX(-50%);font-size:.6rem;letter-spacing:.12em;color:var(--neon);opacity:0;transition:opacity .3s;white-space:nowrap;}
+body.heaven #combo-display{color:var(--hgold);}
+#combo-display.show{opacity:1;}
+
+/* PARTICLES */
+.click-particle{position:fixed;pointer-events:none;border-radius:50%;background:var(--g5);z-index:50;animation:particleFly var(--dur) ease-out forwards;}
+@keyframes particleFly{0%{opacity:.85;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(.2)}}
+.heaven-particle{background:radial-gradient(circle,#fff 0%,gold 60%,transparent 100%) !important;}
+.click-number{position:fixed;pointer-events:none;font-size:.7rem;font-weight:700;color:var(--g6);z-index:51;letter-spacing:.06em;animation:numFloat .9s ease-out forwards;}
+@keyframes numFloat{0%{opacity:.9;transform:translateY(0)}100%{opacity:0;transform:translateY(-50px)}}
+.pulse-ring{position:fixed;border-radius:50%;border:2px solid var(--g4);pointer-events:none;z-index:40;animation:ringBurst .85s ease-out forwards;}
+@keyframes ringBurst{0%{opacity:.7;transform:scale(.5)}100%{opacity:0;transform:scale(2.8)}}
+.heaven-ring{border-color:gold !important;box-shadow:0 0 10px gold;}
+
+/* ABILITY BAR */
+#ability-bar{display:flex;gap:.5rem;margin-top:1.2rem;z-index:3;flex-wrap:wrap;justify-content:center;max-width:480px;}
+.ability-btn{padding:.38rem .85rem;border:1px solid var(--g3);background:rgba(7,26,9,.75);color:var(--g4);font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;cursor:pointer;border-radius:2px;transition:all .18s;position:relative;overflow:hidden;}
+.ability-btn:hover:not(:disabled){border-color:var(--g4);background:rgba(13,46,16,.85);color:var(--g6);}
+.ability-btn:disabled{opacity:.3;cursor:default;}
+.ability-btn.oc-btn{border-color:var(--neon);color:var(--neon);}
+.ability-btn.fz-btn{border-color:#ff6b35;color:#ff6b35;}
+.ability-btn.vd-btn{border-color:#8b5cf6;color:#8b5cf6;}
+.ability-btn.hv-btn{border-color:gold;color:gold;}
+.ability-cd{position:absolute;bottom:0;left:0;height:2px;background:currentColor;opacity:.5;}
+
+#oc-timer{font-size:.56rem;letter-spacing:.16em;color:var(--neon);opacity:0;transition:opacity .3s;text-align:center;margin-top:.38rem;}
+body.heaven #oc-timer{color:gold;}
+#oc-timer.show{opacity:1;}
+#eps-display{margin-top:.45rem;font-size:.55rem;letter-spacing:.16em;color:var(--g3);transition:color 3s;}
+body.heaven #eps-display{color:#5a8fa8;}
+
+/* PROGRESS */
+#progress-wrap{position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);width:clamp(160px,40vw,380px);z-index:3;}
+.prog-label{font-size:.46rem;letter-spacing:.2em;color:var(--g2);margin-bottom:.28rem;text-align:center;transition:color 3s;}
+body.heaven .prog-label{color:#5a8fa8;}
+.prog-track{height:2px;background:var(--g1);border-radius:2px;overflow:hidden;transition:background 3s;}
+body.heaven .prog-track{background:rgba(168,216,240,.3);}
+.prog-fill{height:100%;background:var(--g4);border-radius:2px;box-shadow:0 0 8px var(--g4);transition:width .6s ease,background 3s,box-shadow 3s;}
+body.heaven .prog-fill{background:gold;box-shadow:0 0 12px gold;}
+
+/* SHOP */
+#shop{grid-area:shop;width:clamp(235px,27vw,325px);border-left:1px solid var(--g2);background:rgba(2,10,3,.93);display:flex;flex-direction:column;overflow:hidden;transition:background 3s,border-color 3s;}
+body.heaven #shop{background:rgba(232,244,253,.94);border-left-color:#a8d8f0;}
+.shop-header{padding:.55rem .9rem .38rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(22,92,26,.3);transition:border-color 3s;}
+body.heaven .shop-header{border-bottom-color:rgba(168,216,240,.4);}
+.shop-header-title{font-size:.5rem;letter-spacing:.26em;color:var(--g2);text-transform:uppercase;transition:color 3s;}
+body.heaven .shop-header-title{color:#5a8fa8;}
+.shop-tabs{display:flex;gap:.28rem;}
+.shop-tab{font-size:.46rem;letter-spacing:.14em;padding:.16rem .38rem;border:1px solid var(--g2);border-radius:2px;cursor:pointer;color:var(--g3);background:transparent;font-family:var(--mono);transition:all .18s;}
+.shop-tab.active{border-color:var(--g4);color:var(--g4);background:rgba(34,160,42,.08);}
+body.heaven .shop-tab{border-color:#a8d8f0;color:#5a8fa8;}
+body.heaven .shop-tab.active{border-color:#1a6b8a;color:#1a6b8a;background:rgba(26,107,138,.08);}
+#shop-list{flex:1;overflow-y:auto;padding:.38rem .45rem .7rem;scrollbar-width:thin;scrollbar-color:var(--g2) transparent;}
+body.heaven #shop-list{scrollbar-color:#a8d8f0 transparent;}
+
+/* UPGRADE CARDS */
+.upgrade{border:1px solid var(--g2);border-radius:3px;padding:.5rem .6rem;margin-bottom:.36rem;cursor:pointer;transition:border-color .18s,background .18s,opacity .18s;background:rgba(7,26,9,.5);position:relative;overflow:hidden;}
+.upgrade::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(46,204,56,.05),transparent);transform:translateX(-100%);transition:transform .35s;}
+.upgrade:hover::before{transform:translateX(100%)}
+.upgrade:hover{border-color:var(--g3);background:rgba(13,46,16,.65)}
+.upgrade.affordable:hover{border-color:var(--g4)}
+.upgrade.cant-afford{opacity:.36;cursor:default;}
+.upgrade.cant-afford:hover::before{transform:translateX(-100%)}
+.upgrade.locked{opacity:.16;cursor:default;pointer-events:none}
+.upgrade.maxed{opacity:.45;cursor:default;border-style:dashed;}
+body.heaven .upgrade{background:rgba(255,255,255,.4);border-color:rgba(168,216,240,.5);}
+body.heaven .upgrade:hover{background:rgba(255,255,255,.6);border-color:#a8d8f0;}
+.upg-name{font-size:.66rem;font-weight:700;color:var(--g5);letter-spacing:.06em;margin-bottom:.12rem;transition:color 3s;}
+body.heaven .upg-name{color:#1a4a6b;}
+.upg-desc{font-size:.52rem;color:var(--g3);letter-spacing:.03em;line-height:1.48;margin-bottom:.28rem;transition:color 3s;}
+body.heaven .upg-desc{color:#5a8fa8;}
+.upg-footer{display:flex;align-items:center;justify-content:space-between;}
+.upg-cost{font-size:.6rem;font-weight:700;color:var(--g4);letter-spacing:.07em;transition:color 3s;}
+body.heaven .upg-cost{color:#1a6b8a;}
+.upg-owned{font-size:.48rem;letter-spacing:.09em;color:var(--g2);transition:color 3s;}
+body.heaven .upg-owned{color:#5a8fa8;}
+.upg-tag{display:inline-block;font-size:.42rem;letter-spacing:.15em;padding:.05rem .26rem;border:1px solid var(--g2);border-radius:1px;color:var(--g2);margin-bottom:.24rem;text-transform:uppercase;transition:all 3s;}
+.upg-tag.s1{border-color:#0d2e10;color:#0d2e10;}
+.upg-tag.s2{border-color:#165c1a;color:#165c1a;}
+.upg-tag.s3{border-color:#22a02a;color:#22a02a;}
+.upg-tag.s4{border-color:#2ecc38;color:#2ecc38;}
+.upg-tag.s5{border-color:#5eff68;color:#5eff68;}
+.upg-tag.s6{border-color:#a8ffad;color:#a8ffad;}
+.upg-tag.s7{border-color:gold;color:gold;}
+body.heaven .upg-tag.s7{border-color:#ffd700;color:#ffd700;}
+
+/* MILESTONE CARDS */
+.milestone-card{border:1px solid var(--g2);border-radius:3px;padding:.45rem .55rem;margin-bottom:.34rem;background:rgba(7,26,9,.4);display:flex;align-items:center;gap:.55rem;transition:all 3s;}
+.milestone-card.done{border-color:var(--g3);background:rgba(13,46,16,.4);}
+body.heaven .milestone-card{background:rgba(255,255,255,.35);border-color:rgba(168,216,240,.4);}
+body.heaven .milestone-card.done{background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.4);}
+.ms-icon{font-size:.95rem;flex-shrink:0;}
+.ms-info{flex:1;}
+.ms-name{font-size:.6rem;font-weight:700;color:var(--g4);letter-spacing:.06em;transition:color 3s;}
+body.heaven .ms-name{color:#1a6b8a;}
+.ms-desc{font-size:.48rem;color:var(--g3);letter-spacing:.04em;margin-top:.08rem;transition:color 3s;}
+body.heaven .ms-desc{color:#5a8fa8;}
+.ms-reward{font-size:.48rem;color:var(--g5);letter-spacing:.05em;margin-top:.08rem;transition:color 3s;}
+body.heaven .ms-reward{color:#1a4a6b;}
+.ms-check{font-size:.85rem;color:var(--g4);transition:color 3s;}
+body.heaven .ms-check{color:gold;}
+
+/* MILESTONE PIPS ROW */
+#milestone-row{position:absolute;top:.5rem;left:50%;transform:translateX(-50%);display:flex;gap:.35rem;z-index:5;pointer-events:none;}
+.ms-pip{width:5px;height:5px;border-radius:50%;border:1px solid var(--g3);background:transparent;transition:all .4s;}
+.ms-pip.done{background:var(--g4);border-color:var(--g4);}
+body.heaven .ms-pip{border-color:rgba(255,215,0,.4);}
+body.heaven .ms-pip.done{background:gold;border-color:gold;}
+
+/* HEAVEN TEXT LABELS */
+#heaven-label{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--serif);font-size:clamp(2.5rem,8vw,5rem);color:white;opacity:0;pointer-events:none;z-index:100;text-shadow:0 0 40px gold,0 0 80px rgba(255,255,255,.5);letter-spacing:.1em;transition:opacity 2s ease;}
+#heaven-label.show{opacity:1;}
+
+/* END SCREEN */
+#endscreen{position:fixed;inset:0;z-index:900;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1.5s ease;}
+#endscreen.show{opacity:1;pointer-events:all}
+#end-canvas{position:absolute;inset:0;pointer-events:none;}
+.end-title{font-family:var(--serif);font-size:clamp(2rem,6vw,3.8rem);color:var(--g6);letter-spacing:.06em;margin-bottom:.5rem;position:relative;z-index:1;text-align:center;}
+.end-sub{font-size:.6rem;letter-spacing:.2em;color:var(--g3);margin-bottom:2rem;position:relative;z-index:1;text-align:center;}
+.end-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-bottom:2.2rem;position:relative;z-index:1;max-width:500px;width:90%;}
+.end-stat{text-align:center;border:1px solid var(--g2);border-radius:3px;padding:.55rem .7rem;background:rgba(7,26,9,.5);}
+.end-stat-val{font-size:.95rem;font-weight:700;color:var(--g5);letter-spacing:.04em;}
+.end-stat-lbl{font-size:.44rem;letter-spacing:.16em;color:var(--g3);margin-top:.18rem;}
+.end-btns{display:flex;gap:1rem;position:relative;z-index:1;flex-wrap:wrap;justify-content:center;}
+.end-btn{padding:.65rem 1.6rem;border:1px solid var(--g3);background:transparent;color:var(--g5);font-family:var(--mono);font-size:.68rem;letter-spacing:.13em;cursor:pointer;border-radius:2px;transition:all .18s;text-transform:uppercase;}
+.end-btn:hover{border-color:var(--g4);background:rgba(34,160,42,.12);color:var(--g6)}
+.end-btn.prestige{border-color:var(--neon);color:var(--neon);}
+.end-btn.prestige:hover{background:rgba(0,255,68,.1);}
+.prestige-bonus{font-size:.54rem;letter-spacing:.1em;color:var(--g3);margin-top:.9rem;position:relative;z-index:1;text-align:center;}
+
+/* PRESTIGE BADGE */
+#prestige-badge{display:none;position:fixed;top:.6rem;left:50%;transform:translateX(-50%);z-index:10;font-size:.5rem;letter-spacing:.16em;color:var(--neon);border:1px solid rgba(0,255,68,.3);padding:.18rem .55rem;border-radius:2px;background:rgba(0,255,68,.06);pointer-events:none;}
+
+/* TOAST */
+#toast{position:fixed;bottom:1.8rem;left:50%;transform:translateX(-50%);font-size:.58rem;letter-spacing:.12em;color:var(--g5);border:1px solid var(--g3);background:rgba(7,26,9,.95);padding:.35rem .85rem;border-radius:2px;z-index:800;opacity:0;pointer-events:none;transition:opacity .3s ease;white-space:nowrap;}
+#toast.show{opacity:1}
+body.heaven #toast{background:rgba(240,248,255,.95);border-color:#a8d8f0;color:#1a4a6b;}
+
+/* FLASH */
+#event-flash{position:fixed;inset:0;z-index:500;pointer-events:none;opacity:0;transition:opacity .12s;background:rgba(0,255,68,.04);}
+#event-flash.flash{opacity:1;}
+#event-flash.heaven-flash{background:rgba(255,215,0,.08);}
+</style>
+</head>
+<body>
+<div id="prestige-badge">✦ prestige activo</div>
+<div id="loading">
+  <div class="load-title">verdant pulse</div>
+  <div class="load-ring-wrap">
+    <div class="load-ring"></div><div class="load-ring"></div><div class="load-ring"></div>
+    <div class="load-core"></div>
+  </div>
+  <div class="load-bar-wrap"><div class="load-bar" id="load-bar"></div></div>
+  <div class="load-pct" id="load-pct">0%</div>
+</div>
+
+<canvas id="bg-canvas"></canvas>
+<div id="heaven-overlay"></div>
+<canvas id="heaven-canvas"></canvas>
+<div id="heaven-label">ascensión</div>
+<div id="toast"></div>
+<div id="event-flash"></div>
+
+<div id="game">
+  <div id="header">
+    <div class="hdr-title">verdant pulse</div>
+    <div class="hdr-center">
+      <div class="hdr-stat"><div class="hdr-stat-val" id="energy-display">0</div><div class="hdr-stat-lbl">energía vital</div></div>
+      <div class="hdr-div"></div>
+      <div class="hdr-stat"><div class="hdr-stat-val" id="total-display">0</div><div class="hdr-stat-lbl">total generado</div></div>
+      <div class="hdr-div"></div>
+      <div class="hdr-stat"><div class="hdr-stat-val" id="eps-hdr">0/s</div><div class="hdr-stat-lbl">velocidad</div></div>
+      <div class="hdr-div"></div>
+      <div class="hdr-stat"><div class="hdr-stat-val" id="clicks-display">0</div><div class="hdr-stat-lbl">clicks</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.6rem;">
+      <div class="hdr-stage" id="stage-badge">ETAPA<br><span id="stage-name">GERMINACIÓN</span></div>
+    </div>
+  </div>
+
+  <div id="stage">
+    <div id="milestone-row"></div>
+    <div id="orb-wrap">
+      <div class="orb-aura"></div><div class="orb-aura"></div><div class="orb-aura"></div>
+      <div id="orb">
+        <div id="fill-ring"></div>
+        <div id="combo-display"></div>
+      </div>
+    </div>
+    <div id="stats-strip">
+      <div class="ss-item"><div class="ss-val" id="cps-val">1</div><div class="ss-lbl">ev/click</div></div>
+      <div class="ss-item"><div class="ss-val" id="mult-val">×1</div><div class="ss-lbl">multiplicador</div></div>
+      <div class="ss-item"><div class="ss-val" id="auto-val">0</div><div class="ss-lbl">auto ev/s</div></div>
+      <div class="ss-item"><div class="ss-val" id="prestige-val">×1</div><div class="ss-lbl">prestige</div></div>
+    </div>
+    <div id="ability-bar"></div>
+    <div id="oc-timer"></div>
+    <div id="eps-display">0 ev/s</div>
+    <div id="progress-wrap">
+      <div class="prog-label" id="prog-label">PULSO VITAL — <span id="prog-pct">0%</span></div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div id="shop">
+    <div class="shop-header">
+      <div class="shop-header-title">tienda</div>
+      <div class="shop-tabs">
+        <button class="shop-tab active" onclick="switchTab('upgrades')">mejoras</button>
+        <button class="shop-tab" onclick="switchTab('milestones')">logros</button>
+      </div>
+    </div>
+    <div id="shop-list"></div>
+  </div>
+</div>
+
+<div id="endscreen">
+  <canvas id="end-canvas"></canvas>
+  <div class="end-title" id="end-title">ascensión total</div>
+  <div class="end-sub" id="end-sub">el sistema alcanzó el cielo</div>
+  <div class="end-stats">
+    <div class="end-stat"><div class="end-stat-val" id="end-total">0</div><div class="end-stat-lbl">ev generados</div></div>
+    <div class="end-stat"><div class="end-stat-val" id="end-clicks">0</div><div class="end-stat-lbl">clicks totales</div></div>
+    <div class="end-stat"><div class="end-stat-val" id="end-time">0m</div><div class="end-stat-lbl">duración</div></div>
+  </div>
+  <div class="end-btns">
+    <button class="end-btn prestige" onclick="doPrestige()">✦ prestige ×<span id="prestige-mult-btn">1.5</span></button>
+    <button class="end-btn" onclick="doComplete()">cerrar run</button>
+  </div>
+  <div class="prestige-bonus" id="prestige-bonus-txt"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  VERDANT PULSE v3 — EXTENDED + HEAVEN STAGE
+// ═══════════════════════════════════════════════════════════
+
+const G = {
+  energy: 0,
+  totalEarned: 0,
+  clickPower: 1,
+  multiplier: 1,
+  prestigeMult: parseFloat(localStorage.getItem('vp_prestige') || '1'),
+  prestigeCount: parseInt(localStorage.getItem('vp_prestige_n') || '0'),
+
+  autoClickers: 0,
+  comboCount: 0, comboMax: 1, comboTimer: 0,
+  totalClicks: 0,
+
+  // abilities
+  overchargeAvail:false, overchargeActive:false, overchargeEnd:0, ocCooldown:false, ocCooldownEnd:0,
+  frenzyAvail:false, frenzyActive:false, frenzyEnd:0, frenzyCD:false,
+  voidAvail:false, voidActive:false, voidEnd:0, voidCD:false,
+  divineAvail:false, divineActive:false, divineEnd:0, divineCD:false,
+
+  // passives
+  pulseChainAvail:false, pulseChainTimer:0,
+  echoAvail:false, echoTimer:0,
+  bloomAvail:false, bloomTimer:0,
+  novaAvail:false, novaTimer:0,
+  harmonicsAvail:false, harmonicsTimer:0,
+
+  stage: 1,
+  heavenMode: false,
+  gameOver: false,
+  startTime: Date.now(),
+
+  // END threshold — very high, many hours
+  endThreshold: 5e14,
+  // heaven threshold
+  heavenThreshold: 5e10,
+
+  upgrades: {},
+  milestones: {},
+  tab: 'upgrades',
+};
+
+// ── STAGE CONFIG ─────────────────────────────────────────
+const STAGES = {
+  1: { name:'GERMINACIÓN',   thresh:0,       bgMode:1 },
+  2: { name:'CRECIMIENTO',   thresh:5e4,     bgMode:2 },
+  3: { name:'FLORACIÓN',     thresh:8e6,     bgMode:2 },
+  4: { name:'SOBRECARGA',    thresh:5e8,     bgMode:3 },
+  5: { name:'COLAPSO',       thresh:2e10,    bgMode:3 },
+  6: { name:'SINGULARIDAD',  thresh:8e11,    bgMode:4 },
+  7: { name:'ASCENSIÓN',     thresh:5e13,    bgMode:5 },
+};
+
+// ── UPGRADES ─────────────────────────────────────────────
+const UPGRADES = [
+  // ── STAGE 1 — germinación
+  {id:'c1a', s:1, name:'toque básico',         desc:'+2 ev/click',                            cost:50,    sc:1.85, fx:'click', v:2,     max:10},
+  {id:'m2a', s:1, name:'multiplicador ×2',     desc:'duplica la energía por click',           cost:100,   sc:2.2,  fx:'mult',  v:2,     max:1},
+  {id:'a1a', s:1, name:'auto-pulse i',         desc:'0.5 ev/s automático',                   cost:180,   sc:1.8,  fx:'auto',  v:.5,    max:8},
+  {id:'sz1', s:1, name:'nodo expandido',       desc:'el orbe crece',                          cost:250,   sc:2.8,  fx:'size',  v:10,    max:3},
+  {id:'c1b', s:1, name:'canalización i',       desc:'+5 ev/click',                           cost:500,   sc:2.0,  fx:'click', v:5,     max:6},
+  {id:'cbo', s:1, name:'instinto de pulso',    desc:'activa sistema de combo (clicks rápidos)',cost:700,  sc:99,   fx:'combo', v:1,     max:1},
+  {id:'a1b', s:1, name:'raíz nutriente',       desc:'2 ev/s automático',                     cost:1200,  sc:1.85, fx:'auto',  v:2,     max:6},
+  {id:'m3a', s:1, name:'multiplicador ×3',     desc:'×3 energía por click',                  cost:2200,  sc:2.5,  fx:'mult',  v:3,     max:1},
+  {id:'c1c', s:1, name:'pulso profundo i',     desc:'+12 ev/click',                          cost:3500,  sc:2.1,  fx:'click', v:12,    max:5},
+  {id:'a1c', s:1, name:'red de esporas',       desc:'8 ev/s automático',                     cost:6000,  sc:1.9,  fx:'auto',  v:8,     max:5},
+
+  // ── STAGE 2 — crecimiento
+  {id:'m5a', s:2, name:'multiplicador ×5',     desc:'×5 energía',                            cost:15000,  sc:2.8,  fx:'mult',  v:5,     max:1},
+  {id:'oc0', s:2, name:'sobrecarga vital',     desc:'habilidad: 6s ×3 ev (cd 30s)',          cost:25000,  sc:99,   fx:'overcharge',v:1, max:1},
+  {id:'a2a', s:2, name:'micelios activos',     desc:'40 ev/s automático',                    cost:40000,  sc:1.95, fx:'auto',  v:40,    max:7},
+  {id:'c2a', s:2, name:'resonancia celular',   desc:'+35 ev/click',                          cost:60000,  sc:2.3,  fx:'click', v:35,    max:4},
+  {id:'m8a', s:2, name:'multiplicador ×8',     desc:'×8 energía',                            cost:130000, sc:3.0,  fx:'mult',  v:8,     max:1},
+  {id:'ech', s:2, name:'eco de pulso',         desc:'pasivo: cada 12s dispara click ×15',    cost:200000, sc:99,   fx:'echo',  v:1,     max:1},
+  {id:'a2b', s:2, name:'venas de luz',         desc:'200 ev/s automático',                   cost:350000, sc:2.0,  fx:'auto',  v:200,   max:6},
+  {id:'sz2', s:2, name:'núcleo expandido',     desc:'el orbe sigue creciendo',               cost:500000, sc:99,   fx:'size',  v:16,    max:3},
+  {id:'m12', s:2, name:'multiplicador ×12',    desc:'×12 energía',                           cost:1.2e6,  sc:3.2,  fx:'mult',  v:12,    max:1},
+  {id:'c2b', s:2, name:'pulso profundo ii',    desc:'+100 ev/click',                         cost:2e6,    sc:2.4,  fx:'click', v:100,   max:4},
+
+  // ── STAGE 3 — floración
+  {id:'frz', s:3, name:'frenesí vital',        desc:'habilidad: 8s ×8 ev (cd 90s)',          cost:8e6,    sc:99,   fx:'frenzy',v:1,     max:1},
+  {id:'a3a', s:3, name:'corriente profunda',   desc:'1500 ev/s automático',                  cost:12e6,   sc:2.1,  fx:'auto',  v:1500,  max:7},
+  {id:'blm', s:3, name:'floración cuántica',   desc:'pasivo: cada 40s genera ráfaga enorme', cost:20e6,   sc:99,   fx:'bloom', v:1,     max:1},
+  {id:'m20', s:3, name:'multiplicador ×20',    desc:'×20 energía',                           cost:40e6,   sc:3.5,  fx:'mult',  v:20,    max:1},
+  {id:'c3a', s:3, name:'resonancia orgánica',  desc:'+500 ev/click',                         cost:80e6,   sc:2.5,  fx:'click', v:500,   max:4},
+  {id:'a3b', s:3, name:'colapso micelial',     desc:'8000 ev/s automático',                  cost:150e6,  sc:2.15, fx:'auto',  v:8000,  max:6},
+  {id:'pch', s:3, name:'pulse chain',          desc:'pasivo: cada 20s explota en anillos',   cost:280e6,  sc:99,   fx:'pchain',v:1,     max:1},
+  {id:'m40', s:3, name:'multiplicador ×40',    desc:'×40 energía',                           cost:600e6,  sc:4.0,  fx:'mult',  v:40,    max:1},
+  {id:'a3c', s:3, name:'tormenta vital',       desc:'50000 ev/s automático',                 cost:1.5e9,  sc:2.2,  fx:'auto',  v:50000, max:5},
+  {id:'c3b', s:3, name:'pulso profundo iii',   desc:'+3000 ev/click',                        cost:4e9,    sc:2.6,  fx:'click', v:3000,  max:4},
+
+  // ── STAGE 4 — sobrecarga
+  {id:'vd0', s:4, name:'drenaje del vacío',    desc:'habilidad: 12s ×25 ev (cd 2min)',       cost:15e9,   sc:99,   fx:'void',  v:1,     max:1},
+  {id:'a4a', s:4, name:'bucle de energía',     desc:'300k ev/s automático',                  cost:25e9,   sc:2.2,  fx:'auto',  v:3e5,   max:6},
+  {id:'m80', s:4, name:'multiplicador ×80',    desc:'×80 energía',                           cost:60e9,   sc:4.5,  fx:'mult',  v:80,    max:1},
+  {id:'nov', s:4, name:'nova orgánica',        desc:'pasivo: cada 60s, explosión masiva',    cost:120e9,  sc:99,   fx:'nova',  v:1,     max:1},
+  {id:'c4a', s:4, name:'canalización suprema', desc:'+20000 ev/click',                       cost:250e9,  sc:2.8,  fx:'click', v:20000, max:4},
+  {id:'a4b', s:4, name:'maelström vital',      desc:'2M ev/s automático',                    cost:600e9,  sc:2.3,  fx:'auto',  v:2e6,   max:5},
+  {id:'m200',s:4, name:'multiplicador ×200',   desc:'×200 energía',                          cost:1.5e12, sc:5.0,  fx:'mult',  v:200,   max:1},
+  {id:'hrm', s:4, name:'armónicos del pulso',  desc:'pasivo: cada 10s bonus basado en total',cost:4e12,   sc:99,   fx:'harm',  v:1,     max:1},
+
+  // ── STAGE 5 — colapso
+  {id:'a5a', s:5, name:'colapso cuántico',     desc:'10M ev/s automático',                   cost:8e12,   sc:2.3,  fx:'auto',  v:1e7,   max:6},
+  {id:'m500',s:5, name:'multiplicador ×500',   desc:'×500 energía',                          cost:20e12,  sc:5.5,  fx:'mult',  v:500,   max:1},
+  {id:'c5a', s:5, name:'eco del universo i',   desc:'+200k ev/click',                        cost:60e12,  sc:3.0,  fx:'click', v:2e5,   max:4},
+  {id:'a5b', s:5, name:'enjambre de luz',      desc:'80M ev/s automático',                   cost:200e12, sc:2.4,  fx:'auto',  v:8e7,   max:5},
+  {id:'m1k', s:5, name:'multiplicador ×1000',  desc:'×1000 energía — el colapso se acerca',  cost:600e12, sc:6.0,  fx:'mult',  v:1000,  max:1},
+
+  // ── STAGE 6 — singularidad
+  {id:'a6a', s:6, name:'singularidad verde',   desc:'500M ev/s automático',                  cost:2e15,   sc:2.4,  fx:'auto',  v:5e8,   max:5},
+  {id:'m5k', s:6, name:'multiplicador ×5000',  desc:'×5000 energía',                         cost:8e15,   sc:7.0,  fx:'mult',  v:5000,  max:1},
+  {id:'c6a', s:6, name:'eco del universo ii',  desc:'+5M ev/click',                          cost:25e15,  sc:3.2,  fx:'click', v:5e6,   max:3},
+  {id:'a6b', s:6, name:'tormenta de luz',      desc:'3B ev/s automático',                    cost:100e15, sc:2.5,  fx:'auto',  v:3e9,   max:4},
+
+  // ── STAGE 7 — ascensión (heaven)
+  {id:'dv0', s:7, name:'intervención divina',  desc:'habilidad: 15s ×50 ev (cd 3min)',       cost:1e18,   sc:99,   fx:'divine',v:1,     max:1},
+  {id:'a7a', s:7, name:'coro celestial',       desc:'20B ev/s automático',                   cost:5e18,   sc:2.6,  fx:'auto',  v:2e10,  max:5},
+  {id:'mInf',s:7, name:'multiplicador divino', desc:'×50000 — energía infinita',             cost:30e18,  sc:99,   fx:'mult',  v:50000, max:1},
+];
+
+// ── MILESTONES ────────────────────────────────────────────
+const MILESTONES = [
+  {id:'ms_c50',   name:'primer impulso',     desc:'50 clicks totales',         icon:'◉', check:()=>G.totalClicks>=50,    rw:'click', rv:3,    rt:'+3 ev/click'},
+  {id:'ms_e1k',   name:'umbral vital',       desc:'1.000 ev totales',          icon:'◈', check:()=>G.totalEarned>=1e3,   rw:'mult',  rv:1.2,  rt:'×1.2 mult'},
+  {id:'ms_c500',  name:'ritmo constante',    desc:'500 clicks',                icon:'◉', check:()=>G.totalClicks>=500,   rw:'click', rv:15,   rt:'+15 ev/click'},
+  {id:'ms_a5',    name:'red autónoma',       desc:'5 ev/s auto',               icon:'⟳', check:()=>G.autoClickers>=5,    rw:'auto',  rv:1,    rt:'+1 ev/s'},
+  {id:'ms_e50k',  name:'corriente verde',    desc:'50.000 ev totales',         icon:'◈', check:()=>G.totalEarned>=5e4,   rw:'mult',  rv:1.5,  rt:'×1.5 mult'},
+  {id:'ms_c5k',   name:'pulso constante',    desc:'5.000 clicks',              icon:'◉', check:()=>G.totalClicks>=5000,  rw:'click', rv:50,   rt:'+50 ev/click'},
+  {id:'ms_s2',    name:'primer crecimiento', desc:'llegar a etapa 2',          icon:'↑', check:()=>G.stage>=2,           rw:'mult',  rv:2,    rt:'×2 mult'},
+  {id:'ms_e5m',   name:'marea verde',        desc:'5M ev totales',             icon:'◈', check:()=>G.totalEarned>=5e6,   rw:'auto',  rv:50,   rt:'+50 ev/s'},
+  {id:'ms_a500',  name:'maraña de raíces',   desc:'500 ev/s auto',             icon:'⟳', check:()=>G.autoClickers>=500,  rw:'mult',  rv:1.8,  rt:'×1.8 mult'},
+  {id:'ms_c50k',  name:'el incansable',      desc:'50.000 clicks',             icon:'◉', check:()=>G.totalClicks>=50000, rw:'click', rv:500,  rt:'+500 ev/click'},
+  {id:'ms_s3',    name:'floración',          desc:'llegar a etapa 3',          icon:'↑', check:()=>G.stage>=3,           rw:'mult',  rv:3,    rt:'×3 mult'},
+  {id:'ms_e1b',   name:'colapso inminente',  desc:'1B ev totales',             icon:'◈', check:()=>G.totalEarned>=1e9,   rw:'auto',  rv:5000, rt:'+5k ev/s'},
+  {id:'ms_s4',    name:'sobrecarga',         desc:'llegar a etapa 4',          icon:'↑', check:()=>G.stage>=4,           rw:'mult',  rv:4,    rt:'×4 mult'},
+  {id:'ms_c500k', name:'el elegido',         desc:'500.000 clicks',            icon:'◉', check:()=>G.totalClicks>=5e5,   rw:'click', rv:5000, rt:'+5k ev/click'},
+  {id:'ms_e1t',   name:'singularidad',       desc:'1T ev totales',             icon:'★', check:()=>G.totalEarned>=1e12,  rw:'mult',  rv:8,    rt:'×8 mult'},
+  {id:'ms_s5',    name:'colapso',            desc:'llegar a etapa 5',          icon:'↑', check:()=>G.stage>=5,           rw:'mult',  rv:5,    rt:'×5 mult'},
+  {id:'ms_a1m',   name:'río de energía',     desc:'1M ev/s auto',              icon:'⟳', check:()=>G.autoClickers>=1e6,  rw:'mult',  rv:3,    rt:'×3 mult'},
+  {id:'ms_s6',    name:'singularidad',       desc:'llegar a etapa 6',          icon:'↑', check:()=>G.stage>=6,           rw:'mult',  rv:10,   rt:'×10 mult'},
+  {id:'ms_heaven','name':'el cielo',         desc:'50B ev totales — ascensión',icon:'✦', check:()=>G.totalEarned>=5e10,  rw:'mult',  rv:1,    rt:'bienvenido al cielo'},
+  {id:'ms_s7',    name:'ascensión',          desc:'llegar a etapa 7',          icon:'✦', check:()=>G.stage>=7,           rw:'mult',  rv:20,   rt:'×20 mult'},
+];
+
+// ── DOM ──────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const $energy=$('energy-display'), $total=$('total-display'), $epsHdr=$('eps-hdr'),
+      $clicksD=$('clicks-display'), $epsD=$('eps-display'), $progF=$('prog-fill'),
+      $progPct=$('prog-pct'), $sSel=$('stage-name'), $orb=$('orb'),
+      $orbWrap=$('orb-wrap'), $fillRing=$('fill-ring'), $ocTimer=$('oc-timer'),
+      $shopList=$('shop-list'), $game=$('game'), $loading=$('loading'),
+      $endScr=$('endscreen'), $presB=$('prestige-badge'), $toast=$('toast'),
+      $abilBar=$('ability-bar'), $comboD=$('combo-display'),
+      $cpsV=$('cps-val'), $multV=$('mult-val'), $autoV=$('auto-val'),
+      $presV=$('prestige-val'), $msRow=$('milestone-row'),
+      $flash=$('event-flash'), $heavenOv=$('heaven-overlay'),
+      $heavenLabel=$('heaven-label'), $progLabel=$('prog-label');
+
+let orbSize=120, bgMode=1, currentTab='upgrades';
+
+// ── LOADING ──────────────────────────────────────────────
+{
+  const bar=$('load-bar'), pct=$('load-pct'), DUR=13000, start=Date.now();
+  function tl(){
+    const p=Math.min((Date.now()-start)/DUR,1), v=p<.5?2*p*p:-1+(4-2*p)*p;
+    bar.style.width=Math.round(v*100)+'%'; pct.textContent=Math.round(v*100)+'%';
+    p<1?requestAnimationFrame(tl):enterGame();
+  }
+  requestAnimationFrame(tl);
+}
+
+function enterGame(){
+  $loading.classList.add('fade-out');
+  setTimeout(()=>$loading.style.display='none',1300);
+  $game.classList.add('visible');
+  if(G.prestigeCount>0) $presB.style.display='block';
+  setOrbSize(orbSize);
+  $orbWrap.addEventListener('pointerdown',handleClick);
+  buildShop(); buildMilestoneRow(); startBgCanvas();
+  setInterval(gameTick,100);
+  requestAnimationFrame(renderLoop);
+}
+
+// ── ORB ─────────────────────────────────────────────────
+function setOrbSize(sz){
+  orbSize=Math.max(80,Math.min(sz,250));
+  $orb.style.width=orbSize+'px'; $orb.style.height=orbSize+'px';
+}
+
+// ── CLICK ────────────────────────────────────────────────
+let lastClickTime=0, comboTimeout=null;
+function handleClick(e){
+  if(G.gameOver) return;
+  const now=Date.now(); if(now-lastClickTime<22) return;
+  lastClickTime=now; G.totalClicks++;
+
+  let earned=G.clickPower*G.multiplier*G.prestigeMult;
+  const multiplyActive=()=>{
+    if(G.overchargeActive&&now<G.overchargeEnd) earned*=3;
+    if(G.frenzyActive&&now<G.frenzyEnd) earned*=8;
+    if(G.voidActive&&now<G.voidEnd) earned*=25;
+    if(G.divineActive&&now<G.divineEnd) earned*=50;
+  };
+  multiplyActive();
+
+  if(G.comboMax>1){
+    clearTimeout(comboTimeout);
+    G.comboCount=Math.min(G.comboCount+1,G.comboMax);
+    const bonus=1+(G.comboCount/G.comboMax)*2;
+    earned*=bonus;
+    if(G.comboCount>2){
+      $comboD.textContent='combo ×'+G.comboCount+' [+'+Math.round((bonus-1)*100)+'%]';
+      $comboD.classList.add('show');
+    }
+    comboTimeout=setTimeout(()=>{G.comboCount=0;$comboD.classList.remove('show');},1600);
+  }
+
+  addEnergy(earned);
+  spawnClickParticles(e.clientX,e.clientY,earned);
+  $orb.classList.remove('clicked'); void $orb.offsetWidth; $orb.classList.add('clicked');
+  setTimeout(()=>$orb.classList.remove('clicked'),260);
+  checkMilestones();
+}
+
+function addEnergy(amt){
+  G.energy+=amt; G.totalEarned+=amt; checkStageUp();
+}
+
+function checkStageUp(){
+  for(const [n,cfg] of Object.entries(STAGES)){
+    const sn=+n;
+    if(G.stage<sn && G.totalEarned>=cfg.thresh && cfg.thresh>0){ setStage(sn); break; }
+  }
+}
+
+function setStage(n){
+  G.stage=n;
+  const cfg=STAGES[n];
+  $sSel.textContent=cfg.name;
+  bgMode=cfg.bgMode;
+  buildShop(); buildMilestoneRow();
+  showToast('✦ etapa '+n+' — '+cfg.name.toLowerCase());
+  flashScreen(false);
+  // check heaven
+  if(n>=7 && !G.heavenMode) triggerHeaven();
+}
+
+// ── HEAVEN TRIGGER ───────────────────────────────────────
+function triggerHeaven(){
+  G.heavenMode=true;
+  // fade in heaven
+  $heavenOv.style.opacity='1';
+  setTimeout(()=>{
+    document.body.classList.add('heaven');
+    $heavenLabel.classList.add('show');
+    setTimeout(()=>$heavenLabel.classList.remove('show'),3500);
+    $orb.classList.add('heaven-pulse');
+    startHeavenCanvas();
+    showToast('✦ bienvenido al cielo — ascensión iniciada');
+  },2000);
+}
+
+// ── GAME TICK ────────────────────────────────────────────
+let lastTick=Date.now();
+function gameTick(){
+  if(G.gameOver) return;
+  const now=Date.now(), dt=(now-lastTick)/1000; lastTick=now;
+
+  if(G.autoClickers>0){
+    let gen=G.autoClickers*dt*G.multiplier*G.prestigeMult;
+    if(G.overchargeActive&&now<G.overchargeEnd) gen*=3;
+    if(G.frenzyActive&&now<G.frenzyEnd) gen*=8;
+    if(G.voidActive&&now<G.voidEnd) gen*=25;
+    if(G.divineActive&&now<G.divineEnd) gen*=50;
+    addEnergy(gen);
+  }
+
+  // ability expiry
+  if(G.overchargeActive&&now>=G.overchargeEnd){G.overchargeActive=false;$orb.classList.remove('overcharge-active');}
+  if(G.frenzyActive&&now>=G.frenzyEnd){G.frenzyActive=false;$orb.classList.remove('frenzy-active');}
+  if(G.voidActive&&now>=G.voidEnd) G.voidActive=false;
+  if(G.divineActive&&now>=G.divineEnd) G.divineActive=false;
+
+  // passives
+  if(G.echoAvail){G.echoTimer+=100; if(G.echoTimer>=12000){G.echoTimer=0;triggerEcho();}}
+  if(G.bloomAvail){G.bloomTimer+=100; if(G.bloomTimer>=40000){G.bloomTimer=0;triggerBloom();}}
+  if(G.pulseChainAvail){G.pulseChainTimer+=100; if(G.pulseChainTimer>=20000){G.pulseChainTimer=0;triggerPulseChain();}}
+  if(G.novaAvail){G.novaTimer+=100; if(G.novaTimer>=60000){G.novaTimer=0;triggerNova();}}
+  if(G.harmonicsAvail){G.harmonicsTimer+=100; if(G.harmonicsTimer>=10000){G.harmonicsTimer=0;triggerHarmonics();}}
+
+  // cooldowns
+  updateCooldownBars(now);
+  checkMilestones();
+
+  // end check
+  const fill=Math.min(G.totalEarned/G.endThreshold,1);
+  if(fill>=1&&!G.gameOver) triggerEnd();
+
+  updateUI();
+}
+
+function renderLoop(){if(!G.gameOver){drawBg();requestAnimationFrame(renderLoop);}}
+
+// ── UI ───────────────────────────────────────────────────
+function updateUI(){
+  $energy.textContent=fmtE(G.energy);
+  $total.textContent=fmtE(G.totalEarned);
+  $clicksD.textContent=fmtE(G.totalClicks);
+  const eps=G.autoClickers*G.multiplier*G.prestigeMult;
+  $epsD.textContent=fmtE(eps)+' ev/s';
+  $epsHdr.textContent=fmtE(eps)+'/s';
+  $cpsV.textContent=fmtE(G.clickPower*G.multiplier*G.prestigeMult);
+  $multV.textContent='×'+fmtE(G.multiplier);
+  $autoV.textContent=fmtE(G.autoClickers);
+  $presV.textContent='×'+G.prestigeMult.toFixed(2);
+
+  const fill=Math.min(G.totalEarned/G.endThreshold*100,100);
+  $progF.style.width=fill+'%'; $progPct.textContent=fill.toFixed(3)+'%';
+  $fillRing.style.setProperty('--fill',fill);
+
+  // heaven progress label
+  if(!G.heavenMode && G.totalEarned>=5e9){
+    const hpct=Math.min(G.totalEarned/5e10*100,100).toFixed(1);
+    $progLabel.innerHTML='PULSO VITAL — <span id="prog-pct">'+fill.toFixed(3)+'%</span> | cielo: '+hpct+'%';
+  }
+
+  const now=Date.now();
+  let timerText='';
+  if(G.divineActive&&now<G.divineEnd) timerText='✦ divino '+(((G.divineEnd-now)/1000).toFixed(1))+'s';
+  else if(G.frenzyActive&&now<G.frenzyEnd) timerText='🔥 frenesí '+(((G.frenzyEnd-now)/1000).toFixed(1))+'s';
+  else if(G.voidActive&&now<G.voidEnd) timerText='◆ vacío '+(((G.voidEnd-now)/1000).toFixed(1))+'s';
+  else if(G.overchargeActive&&now<G.overchargeEnd) timerText='⚡ sobrecarga '+(((G.overchargeEnd-now)/1000).toFixed(1))+'s';
+  $ocTimer.textContent=timerText; timerText?$ocTimer.classList.add('show'):$ocTimer.classList.remove('show');
+
+  // shop cost refresh
+  document.querySelectorAll('.upgrade').forEach(el=>{
+    const id=el.dataset.id, upg=UPGRADES.find(u=>u.id===id); if(!upg) return;
+    const owned=G.upgrades[id]||0, cost=getUpgCost(upg);
+    if(owned>=upg.max){el.className='upgrade maxed';return;}
+    if(upg.s>G.stage){el.className='upgrade locked';return;}
+    el.className='upgrade'+(G.energy>=cost?' affordable':' cant-afford');
+    el.querySelector('.upg-cost').textContent=fmtE(cost)+' ev';
+    el.querySelector('.upg-owned').textContent=owned+'/'+upg.max;
+  });
+}
+
+function updateCooldownBars(now){
+  const pairs=[
+    {id:'btn-oc', cd:G.ocCooldown, end:G.ocCooldownEnd, dur:30000, clr:()=>G.ocCooldown=false},
+    {id:'btn-fz', cd:G.frenzyCD,   end:G.frenzyEnd+90000, dur:90000, clr:()=>G.frenzyCD=false},
+    {id:'btn-vd', cd:G.voidCD,     end:G.voidEnd+120000, dur:120000, clr:()=>G.voidCD=false},
+    {id:'btn-dv', cd:G.divineCD,   end:G.divineEnd+180000,dur:180000, clr:()=>G.divineCD=false},
+  ];
+  pairs.forEach(p=>{
+    const btn=$(p.id); if(!btn||!p.cd) return;
+    const rem=Math.max(0,p.end-now), pct=(1-rem/p.dur)*100;
+    const bar=btn.querySelector('.ability-cd'); if(bar) bar.style.width=pct+'%';
+    if(now>=p.end){p.clr();btn.disabled=false;if(bar)bar.style.width='100%';}
+  });
+}
+
+// ── SHOP ─────────────────────────────────────────────────
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.shop-tab').forEach(t=>{
+    t.classList.toggle('active', (tab==='upgrades'&&t.textContent.includes('mejoras'))||(tab==='milestones'&&t.textContent.includes('logros')));
+  });
+  buildShop();
+}
+
+function buildShop(){
+  $shopList.innerHTML='';
+  currentTab==='upgrades'?buildUpgradesTab():buildMilestonesTab();
+}
+
+const stageTags={1:'germinación',2:'crecimiento',3:'floración',4:'sobrecarga',5:'colapso',6:'singularidad',7:'ascensión'};
+function buildUpgradesTab(){
+  UPGRADES.forEach(upg=>{
+    const el=document.createElement('div'); el.className='upgrade'; el.dataset.id=upg.id;
+    const owned=G.upgrades[upg.id]||0, cost=getUpgCost(upg);
+    const locked=upg.s>G.stage||owned>=upg.max;
+    el.innerHTML=`<div class="upg-tag s${upg.s}">${stageTags[upg.s]}</div>
+      <div class="upg-name">${upg.name}</div>
+      <div class="upg-desc">${upg.desc}</div>
+      <div class="upg-footer"><div class="upg-cost">${fmtE(cost)} ev</div><div class="upg-owned">${owned}/${upg.max}</div></div>`;
+    if(owned>=upg.max) el.classList.add('maxed');
+    else if(locked) el.classList.add('locked');
+    else if(G.energy<cost) el.classList.add('cant-afford');
+    else el.classList.add('affordable');
+    el.addEventListener('click',()=>buyUpgrade(upg.id));
+    $shopList.appendChild(el);
+  });
+}
+
+function buildMilestonesTab(){
+  MILESTONES.forEach(ms=>{
+    const done=!!G.milestones[ms.id], el=document.createElement('div');
+    el.className='milestone-card'+(done?' done':'');
+    el.innerHTML=`<div class="ms-icon">${ms.icon}</div>
+      <div class="ms-info">
+        <div class="ms-name">${ms.name}</div>
+        <div class="ms-desc">${ms.desc}</div>
+        <div class="ms-reward">${ms.rt}</div>
+      </div>${done?'<div class="ms-check">✓</div>':''}`;
+    $shopList.appendChild(el);
+  });
+}
+
+function buildMilestoneRow(){
+  $msRow.innerHTML='';
+  MILESTONES.slice(0,14).forEach(ms=>{
+    const pip=document.createElement('div');
+    pip.className='ms-pip'+(G.milestones[ms.id]?' done':'');
+    $msRow.appendChild(pip);
+  });
+}
+
+function getUpgCost(upg){return Math.round(upg.cost*Math.pow(upg.sc,G.upgrades[upg.id]||0));}
+
+function buyUpgrade(id){
+  const upg=UPGRADES.find(u=>u.id===id); if(!upg) return;
+  const owned=G.upgrades[id]||0;
+  if(owned>=upg.max||upg.s>G.stage) return;
+  const cost=getUpgCost(upg); if(G.energy<cost) return;
+  G.energy-=cost; G.upgrades[id]=(owned+1);
+  switch(upg.fx){
+    case 'mult':       G.multiplier*=upg.v; break;
+    case 'auto':       G.autoClickers+=upg.v; break;
+    case 'size':       setOrbSize(orbSize+upg.v); break;
+    case 'click':      G.clickPower+=upg.v; break;
+    case 'combo':      G.comboMax=25; showToast('◎ combo activado'); break;
+    case 'overcharge': G.overchargeAvail=true; addAbilBtn('oc','⚡ sobrecarga','oc-btn',triggerOvercharge); showToast('⚡ sobrecarga desbloqueada'); break;
+    case 'frenzy':     G.frenzyAvail=true;     addAbilBtn('fz','🔥 frenesí','fz-btn',triggerFrenzy);   showToast('🔥 frenesí desbloqueado'); break;
+    case 'void':       G.voidAvail=true;        addAbilBtn('vd','◆ vacío','vd-btn',triggerVoid);        showToast('◆ vacío desbloqueado'); break;
+    case 'divine':     G.divineAvail=true;      addAbilBtn('dv','✦ divino','hv-btn',triggerDivine);     showToast('✦ intervención divina desbloqueada'); break;
+    case 'echo':       G.echoAvail=true;        showToast('◎ eco de pulso activado'); break;
+    case 'bloom':      G.bloomAvail=true;       showToast('✿ floración cuántica activada'); break;
+    case 'pchain':     G.pulseChainAvail=true;  showToast('✦ pulse chain activado'); break;
+    case 'nova':       G.novaAvail=true;        showToast('★ nova orgánica activada'); break;
+    case 'harm':       G.harmonicsAvail=true;   showToast('◈ armónicos activados'); break;
+  }
+  buildShop();
+}
+
+// ── ABILITY BUTTONS ──────────────────────────────────────
+function addAbilBtn(type,label,cls,fn){
+  if($('btn-'+type)) return;
+  const btn=document.createElement('button');
+  btn.id='btn-'+type; btn.className='ability-btn '+cls;
+  btn.innerHTML=label+'<div class="ability-cd" style="width:0%"></div>';
+  btn.addEventListener('click',fn); $abilBar.appendChild(btn);
+}
+
+// ── ABILITIES ────────────────────────────────────────────
+function triggerOvercharge(){
+  if(G.ocCooldown||G.overchargeActive) return;
+  G.overchargeActive=true; G.overchargeEnd=Date.now()+6000;
+  G.ocCooldown=true; G.ocCooldownEnd=Date.now()+30000;
+  $orb.classList.add('overcharge-active');
+  const b=$('btn-oc'); if(b){b.disabled=true; b.querySelector('.ability-cd').style.width='0%';}
+  showToast('⚡ sobrecarga — ×3 por 6s'); flashScreen(false);
+  setTimeout(()=>$orb.classList.remove('overcharge-active'),6000);
+}
+
+function triggerFrenzy(){
+  if(G.frenzyCD||G.frenzyActive) return;
+  G.frenzyActive=true; G.frenzyEnd=Date.now()+8000;
+  G.frenzyCD=true;
+  $orb.classList.add('frenzy-active');
+  const b=$('btn-fz'); if(b){b.disabled=true; b.querySelector('.ability-cd').style.width='0%';}
+  showToast('🔥 frenesí — ×8 por 8s'); flashScreen(false);
+  setTimeout(()=>$orb.classList.remove('frenzy-active'),8000);
+}
+
+function triggerVoid(){
+  if(G.voidCD||G.voidActive) return;
+  G.voidActive=true; G.voidEnd=Date.now()+12000;
+  G.voidCD=true;
+  const b=$('btn-vd'); if(b){b.disabled=true; b.querySelector('.ability-cd').style.width='0%';}
+  showToast('◆ vacío — ×25 por 12s'); flashScreen(false);
+}
+
+function triggerDivine(){
+  if(G.divineCD||G.divineActive) return;
+  G.divineActive=true; G.divineEnd=Date.now()+15000;
+  G.divineCD=true;
+  const b=$('btn-dv'); if(b){b.disabled=true; b.querySelector('.ability-cd').style.width='0%';}
+  showToast('✦ intervención divina — ×50 por 15s'); flashScreen(true);
+}
+
+// ── PASSIVES ─────────────────────────────────────────────
+function triggerEcho(){
+  const e=G.clickPower*G.multiplier*G.prestigeMult*15; addEnergy(e);
+  showToast('◎ eco +'+fmtE(e)+' ev');
+  spawnClickParticles(window.innerWidth/2,window.innerHeight/2,e);
+}
+function triggerBloom(){
+  const e=G.autoClickers*40*G.multiplier*G.prestigeMult; addEnergy(e);
+  showToast('✿ floración +'+fmtE(e)+' ev'); flashScreen(false); ringBurst(8,'#a8ffad');
+}
+function triggerPulseChain(){
+  const e=G.autoClickers*10*G.multiplier*G.prestigeMult; addEnergy(e);
+  showToast('✦ pulse chain +'+fmtE(e)+' ev'); ringBurst(6,G.heavenMode?'gold':'#22a02a');
+}
+function triggerNova(){
+  const e=G.autoClickers*120*G.multiplier*G.prestigeMult; addEnergy(e);
+  showToast('★ nova +'+fmtE(e)+' ev'); flashScreen(false); ringBurst(12,'#5eff68');
+}
+function triggerHarmonics(){
+  const e=G.totalEarned*.0005*G.multiplier; addEnergy(e);
+}
+
+function ringBurst(count,color){
+  const rect=$orb.getBoundingClientRect();
+  const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+  for(let i=0;i<count;i++){
+    const ring=document.createElement('div'); ring.className='pulse-ring'+(G.heavenMode?' heaven-ring':'');
+    const sz=orbSize+20+i*28; ring.style.borderColor=color;
+    ring.style.cssText+=`width:${sz}px;height:${sz}px;top:${cy-sz/2}px;left:${cx-sz/2}px;animation-delay:${i*.09}s`;
+    document.body.appendChild(ring); setTimeout(()=>ring.remove(),1000);
+  }
+}
+
+// ── MILESTONES ───────────────────────────────────────────
+function checkMilestones(){
+  MILESTONES.forEach(ms=>{
+    if(G.milestones[ms.id]) return;
+    if(ms.check()){
+      G.milestones[ms.id]=true;
+      switch(ms.rw){case 'click':G.clickPower+=ms.rv;break;case 'mult':if(ms.rv>1)G.multiplier*=ms.rv;break;case 'auto':G.autoClickers+=ms.rv;break;}
+      showToast('★ '+ms.name+' — '+ms.rt);
+      buildMilestoneRow(); if(currentTab==='milestones') buildShop();
+    }
+  });
+}
+
+// ── END ──────────────────────────────────────────────────
+function triggerEnd(){
+  G.gameOver=true;
+  const elapsed=Math.floor((Date.now()-G.startTime)/1000);
+  $('end-total').textContent=fmtE(G.totalEarned);
+  $('end-clicks').textContent=fmtE(G.totalClicks);
+  $('end-time').textContent=Math.floor(elapsed/60)+'m '+elapsed%60+'s';
+  const nm=(G.prestigeMult*1.5).toFixed(2);
+  $('prestige-mult-btn').textContent=nm;
+  $('prestige-bonus-txt').textContent='prestige ×'+nm+' permanente (tienes '+G.prestigeCount+')';
+  if(G.heavenMode){
+    $endScr.style.background='linear-gradient(180deg,#e8f6ff,#c4e8ff)';
+    $('end-title').style.color='#1a4a6b'; $('end-sub').style.color='#5a8fa8';
+    $('end-title').textContent='ascensión completa'; $('end-sub').textContent='has llegado al cielo';
+  } else {
+    $endScr.style.background='var(--g0)';
+  }
+  $endScr.classList.add('show'); startEndCanvas();
+}
+
+function doPrestige(){
+  localStorage.setItem('vp_prestige',(G.prestigeMult*1.5).toFixed(4));
+  localStorage.setItem('vp_prestige_n',G.prestigeCount+1);
+  location.reload();
+}
+function doComplete(){
+  $endScr.innerHTML=`<div class="end-title" style="font-size:2rem;color:${G.heavenMode?'#1a4a6b':'var(--g6)'}">run completada</div><div class="end-sub" style="margin-bottom:2rem;color:${G.heavenMode?'#5a8fa8':'var(--g3)'}">el sistema volvió al silencio</div><button class="end-btn" onclick="location.reload()">reiniciar</button>`;
+}
+
+// ── PARTICLES ────────────────────────────────────────────
+function spawnClickParticles(x,y,earned){
+  const count=Math.min(3+Math.floor(Math.log10(earned+1)),14);
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div'); p.className='click-particle'+(G.heavenMode?' heaven-particle':'');
+    const sz=2+Math.random()*5, angle=Math.random()*Math.PI*2, dist=28+Math.random()*65;
+    p.style.cssText=`width:${sz}px;height:${sz}px;top:${y-sz/2}px;left:${x-sz/2}px;--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist}px;--dur:${.35+Math.random()*.45}s`;
+    document.body.appendChild(p); setTimeout(()=>p.remove(),950);
+  }
+  const n=document.createElement('div'); n.className='click-number';
+  n.style.color=G.heavenMode?'gold':'var(--g6)';
+  n.textContent='+'+fmtE(earned); n.style.cssText+=`top:${y-18}px;left:${x+10}px;`;
+  document.body.appendChild(n); setTimeout(()=>n.remove(),960);
+}
+
+function flashScreen(isHeavenly){
+  $flash.className='event-flash'+(isHeavenly?' heaven-flash':'');
+  void $flash.offsetWidth; $flash.classList.add('flash');
+  setTimeout(()=>$flash.classList.remove('flash'),160);
+}
+
+// ── BG CANVAS ────────────────────────────────────────────
+const bgCanvas=$('bg-canvas'), bgCtx=bgCanvas.getContext('2d');
+let bgParticles=[], bgRoots=[], bgTime=0;
+
+function initBgParticles(){
+  bgParticles=[];
+  for(let i=0;i<80;i++) bgParticles.push({
+    x:Math.random()*bgCanvas.width, y:Math.random()*bgCanvas.height,
+    r:.4+Math.random()*2.2, speed:.09+Math.random()*.42,
+    alpha:.05+Math.random()*.2, drift:(Math.random()-.5)*.55,
+  });
+}
+function initRoots(){
+  bgRoots=[];
+  for(let i=0;i<18;i++){
+    const cx=bgCanvas.width/2, cy=bgCanvas.height/2;
+    bgRoots.push({points:[{x:cx,y:cy}],angle:(i/18)*Math.PI*2+(Math.random()-.5)*.4,speed:.45+Math.random()*.9,wiggle:.035+Math.random()*.09,alpha:.022+Math.random()*.05,width:.45+Math.random()*1.1});
+  }
+}
+function startBgCanvas(){
+  bgCanvas.width=window.innerWidth; bgCanvas.height=window.innerHeight;
+  initBgParticles(); initRoots();
+  window.addEventListener('resize',()=>{bgCanvas.width=window.innerWidth;bgCanvas.height=window.innerHeight;initBgParticles();initRoots();});
+}
+function drawBg(){
+  if(G.heavenMode){drawHeavenBgSimple();return;}
+  const w=bgCanvas.width, h=bgCanvas.height;
+  bgCtx.clearRect(0,0,w,h); bgTime+=.01;
+
+  bgParticles.forEach(p=>{
+    const spd=bgMode>=4?p.speed*3:bgMode>=3?p.speed*1.8:p.speed;
+    p.y-=spd; p.x+=p.drift;
+    if(p.y<-4){p.y=h+4;p.x=Math.random()*w;} if(p.x<-4||p.x>w+4)p.x=Math.random()*w;
+    const a=bgMode>=5?p.alpha*5:bgMode>=4?p.alpha*3.5:bgMode>=3?p.alpha*2.2:bgMode>=2?p.alpha*1.4:p.alpha;
+    bgCtx.beginPath(); bgCtx.arc(p.x,p.y,p.r*(bgMode>=3?1.7:1),0,Math.PI*2);
+    bgCtx.fillStyle=bgMode>=3?`rgba(0,255,68,${a})`:`rgba(34,160,42,${a})`;
+    bgCtx.fill();
+  });
+
+  if(bgMode>=2) bgRoots.forEach(root=>{
+    const maxP=bgMode>=4?220:180;
+    if(root.points.length<maxP){
+      const l=root.points[root.points.length-1]; root.angle+=(Math.random()-.5)*root.wiggle;
+      root.points.push({x:l.x+Math.cos(root.angle)*root.speed,y:l.y+Math.sin(root.angle)*root.speed});
+    } else {
+      root.points.shift(); const l=root.points[root.points.length-1]; root.angle+=(Math.random()-.5)*root.wiggle;
+      root.points.push({x:l.x+Math.cos(root.angle)*root.speed,y:l.y+Math.sin(root.angle)*root.speed});
+    }
+    if(root.points.length<2) return;
+    bgCtx.beginPath(); bgCtx.moveTo(root.points[0].x,root.points[0].y);
+    for(let i=1;i<root.points.length;i++) bgCtx.lineTo(root.points[i].x,root.points[i].y);
+    const a=bgMode>=5?root.alpha*6:bgMode>=4?root.alpha*4:bgMode>=3?root.alpha*2.5:root.alpha;
+    bgCtx.strokeStyle=(bgMode>=3?`rgba(0,255,68,`:`rgba(22,92,26,`)+a+')';
+    bgCtx.lineWidth=root.width*(bgMode>=3?1.6:1); bgCtx.stroke();
+  });
+
+  if(bgMode>=3){
+    const cx=w/2,cy=h/2,pulse=.5+.5*Math.sin(bgTime*(bgMode>=5?8:bgMode>=4?5:3.5));
+    const gr=bgCtx.createRadialGradient(cx,cy,0,cx,cy,Math.max(w,h)*.65);
+    gr.addColorStop(0,`rgba(0,255,68,${.06*pulse})`);
+    gr.addColorStop(.5,`rgba(0,255,68,${.02*pulse})`);
+    gr.addColorStop(1,'rgba(0,255,68,0)');
+    bgCtx.fillStyle=gr; bgCtx.fillRect(0,0,w,h);
+    for(let y=0;y<h;y+=5){bgCtx.fillStyle=`rgba(0,20,5,.035)`;bgCtx.fillRect(0,y,w,1);}
+  }
+
+  if(bgMode>=4){
+    const t=bgTime*10;
+    for(let i=0;i<4;i++){
+      const sx=Math.sin(t+i*1.57)*w*.42+w/2, sy=Math.cos(t+i*1.32)*h*.32+h/2;
+      bgCtx.beginPath(); bgCtx.moveTo(w/2,h/2); bgCtx.lineTo(sx,sy);
+      bgCtx.strokeStyle=`rgba(0,255,68,${.04+Math.random()*.04})`; bgCtx.lineWidth=.6; bgCtx.stroke();
+    }
+  }
+  if(bgMode>=5){
+    const t=bgTime*4;
+    for(let i=0;i<6;i++){
+      const ax=Math.sin(t+i)*w*.45+w/2, ay=Math.cos(t*1.3+i)*h*.4+h/2;
+      bgCtx.beginPath(); bgCtx.arc(ax,ay,1.5+Math.random()*2,0,Math.PI*2);
+      bgCtx.fillStyle=`rgba(0,255,68,${.4+Math.random()*.5})`; bgCtx.fill();
+    }
+  }
+}
+
+function drawHeavenBgSimple(){
+  // heaven bg handled by CSS overlay + heaven canvas
+  bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
+}
+
+// ── HEAVEN CANVAS ────────────────────────────────────────
+const hCanvas=$('heaven-canvas'), hCtx=hCanvas.getContext('2d');
+let hParts=[], hTime=0, heavenRunning=false;
+
+function startHeavenCanvas(){
+  heavenRunning=true;
+  hCanvas.width=window.innerWidth; hCanvas.height=window.innerHeight;
+  hParts=[];
+  for(let i=0;i<120;i++) hParts.push({
+    x:Math.random()*hCanvas.width, y:Math.random()*hCanvas.height,
+    r:.8+Math.random()*3.5, speed:.2+Math.random()*.8,
+    alpha:.04+Math.random()*.18, drift:(Math.random()-.5)*.4,
+    twinkle:Math.random()*Math.PI*2, twinkleSpeed:.01+Math.random()*.04,
+    isGold:Math.random()>.6,
+  });
+  window.addEventListener('resize',()=>{hCanvas.width=window.innerWidth;hCanvas.height=window.innerHeight;});
+  drawHeaven();
+}
+
+function drawHeaven(){
+  if(!heavenRunning) return;
+  hCtx.clearRect(0,0,hCanvas.width,hCanvas.height); hTime+=.008;
+  hParts.forEach(p=>{
+    p.y-=p.speed; p.x+=p.drift; p.twinkle+=p.twinkleSpeed;
+    if(p.y<-4){p.y=hCanvas.height+4;p.x=Math.random()*hCanvas.width;}
+    if(p.x<-4||p.x>hCanvas.width+4) p.x=Math.random()*hCanvas.width;
+    const tw=.5+.5*Math.sin(p.twinkle);
+    const a=p.alpha*tw;
+    if(p.isGold){
+      const gr=hCtx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2);
+      gr.addColorStop(0,`rgba(255,215,0,${a*2})`);
+      gr.addColorStop(1,'rgba(255,215,0,0)');
+      hCtx.beginPath(); hCtx.arc(p.x,p.y,p.r*2,0,Math.PI*2);
+      hCtx.fillStyle=gr; hCtx.fill();
+    } else {
+      hCtx.beginPath(); hCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      hCtx.fillStyle=`rgba(255,255,255,${a})`; hCtx.fill();
+    }
+  });
+  // light rays from top
+  const cx=hCanvas.width/2;
+  for(let i=0;i<5;i++){
+    const x=cx+(i-2)*hCanvas.width*.14, pulse=.5+.5*Math.sin(hTime*2+i);
+    const gr=hCtx.createLinearGradient(x,0,x+30,hCanvas.height*.6);
+    gr.addColorStop(0,`rgba(255,255,255,${.04*pulse})`);
+    gr.addColorStop(1,'rgba(255,255,255,0)');
+    hCtx.beginPath(); hCtx.moveTo(x-20,0); hCtx.lineTo(x+20,0);
+    hCtx.lineTo(x+80,hCanvas.height*.6); hCtx.lineTo(x-80,hCanvas.height*.6); hCtx.closePath();
+    hCtx.fillStyle=gr; hCtx.fill();
+  }
+  requestAnimationFrame(drawHeaven);
+}
+
+// ── END CANVAS ───────────────────────────────────────────
+function startEndCanvas(){
+  const c=$('end-canvas'), ctx=c.getContext('2d');
+  c.width=window.innerWidth; c.height=window.innerHeight;
+  const parts=[];
+  for(let i=0;i<350;i++){
+    const a=Math.random()*Math.PI*2, s=.8+Math.random()*7;
+    const isHv=G.heavenMode;
+    parts.push({x:c.width/2,y:c.height/2,vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:1+Math.random()*4.5,alpha:.9,decay:.005+Math.random()*.012,col:isHv?(Math.random()>.5?'255,215,0':'255,255,255'):(Math.random()>.5?'46,204,56':'0,255,68')});
+  }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.025;p.alpha-=p.decay;if(p.alpha<=0)return;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${p.col},${p.alpha})`;ctx.fill();});
+    if(parts.some(p=>p.alpha>0)) requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+}
+
+// ── TOAST ────────────────────────────────────────────────
+let toastTO;
+function showToast(msg){
+  $toast.textContent=msg; $toast.classList.add('show');
+  clearTimeout(toastTO); toastTO=setTimeout(()=>$toast.classList.remove('show'),2800);
+}
+
+// ── FORMAT ───────────────────────────────────────────────
+function fmtE(v){
+  v=Math.abs(v);
+  if(v>=1e21) return (v/1e21).toFixed(2)+'Sx';
+  if(v>=1e18) return (v/1e18).toFixed(2)+'Qi';
+  if(v>=1e15) return (v/1e15).toFixed(2)+'Q';
+  if(v>=1e12) return (v/1e12).toFixed(2)+'T';
+  if(v>=1e9)  return (v/1e9).toFixed(2)+'B';
+  if(v>=1e6)  return (v/1e6).toFixed(2)+'M';
+  if(v>=1e3)  return (v/1e3).toFixed(2)+'k';
+  return Math.floor(v).toString();
+}
+</script>
+</body>
+</html>
